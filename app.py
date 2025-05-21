@@ -4,7 +4,6 @@ import pandas as pd
 import openpyxl
 import streamlit as st
 import premailer
-import matplotlib.pyplot as plt
 from openpyxl.utils import get_column_letter
 
 # ─── Helpers ────────────────────────────────────────────────────────────────────
@@ -158,26 +157,4 @@ if st.button("9) Generate Brevo-Ready HTML"):
     st.components.v1.html(email_html, height=600, scrolling=True)
     st.text_area("Copy this HTML:", email_html, height=300)
 
-    # ─── 10. Download as Excel or JPEG ───────────────────────────────────────────
-    dl_cols = ["Image URL"] + cols if use_images else cols
-    dl_df = merged[dl_cols].copy()
-    if use_images:
-        dl_df.rename(columns={"Image URL": "Image URL (CDN)"}, inplace=True)
-    # Excel
-    xbuf = io.BytesIO(); dl_df.to_excel(xbuf, index=False, sheet_name="Offer"); xbuf.seek(0)
-    st.download_button(
-        "⬇️ Download as Excel",
-        data=xbuf,
-        file_name="offer_table.xlsx",
-        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    )
-    # JPEG (data only)
-    jpeg_df = dl_df.drop(columns=["Image URL (CDN)"]) if use_images else dl_df
-    fig, ax = plt.subplots(figsize=(len(jpeg_df.columns)*1.2, max(2,len(jpeg_df)*0.5)), dpi=150)
-    ax.axis('off')
-    tbl = ax.table(cellText=jpeg_df.values.tolist(), colLabels=jpeg_df.columns.tolist(), cellLoc='center', loc='center')
-    tbl.auto_set_font_size(False); tbl.set_fontsize(10)
-    fig.tight_layout(pad=1)
-    jbuf = io.BytesIO(); fig.savefig(jbuf, format='jpeg')
-    st.download_button("⬇️ Download as JPEG", data=jbuf.getvalue(), file_name="offer_table.jpg", mime="image/jpeg")
 
